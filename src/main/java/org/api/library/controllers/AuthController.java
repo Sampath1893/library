@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.api.library.jwt.JwtUtils;
+import org.api.library.models.ChangePasswordRequest;
 import org.api.library.models.ERole;
 import org.api.library.models.Jwt;
 import org.api.library.models.MessageResponse;
@@ -23,6 +24,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -125,5 +127,34 @@ public class AuthController {
 		userRepository.save(user);
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+	}
+	
+	@PostMapping("/changepassword")
+	public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest changepasswordreguest) {
+		
+		System.out.println(changepasswordreguest.getUsername());
+		System.out.println(changepasswordreguest.getCurrentPassword());
+		System.out.println(changepasswordreguest.getNewPassword());
+		
+		if (!(userRepository.existsByUsername(changepasswordreguest.getUsername()))) {
+			return ResponseEntity
+					.badRequest()
+					.body(new MessageResponse("User is Not Present!"));
+		}else {
+			User user = userRepository.findByUsername(changepasswordreguest.getUsername()).get();
+			String dbPassword=user.getPassword();
+			if (encoder.matches(changepasswordreguest.getCurrentPassword(), dbPassword)) {
+				user.setPassword(encoder.encode(changepasswordreguest.getNewPassword())); 
+				userRepository.save(user);
+				return ResponseEntity.ok(new MessageResponse("User Password Updated successfully!"));
+			} else {
+				return ResponseEntity
+						.badRequest()
+						.body(new MessageResponse("Entered Current Password is incorrect!"));
+			}
+
+		
+		}
+		
 	}
 }
