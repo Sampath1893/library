@@ -1,5 +1,6 @@
 package org.api.library.controllers;
 
+import org.api.library.exception.DataNotFoundException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 	@GetMapping("/all")
 	public String allAccess() {
-		return "Public Content.";
+		throw new DataNotFoundException("Test");
 	}
 	
 	@GetMapping("/user")
