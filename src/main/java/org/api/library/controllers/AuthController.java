@@ -9,7 +9,6 @@ import javax.validation.Valid;
 
 import org.api.library.jwt.JwtUtils;
 import org.api.library.models.ChangePasswordRequest;
-import org.api.library.models.ERole;
 import org.api.library.models.Jwt;
 import org.api.library.models.MessageResponse;
 import org.api.library.models.Role;
@@ -51,7 +50,7 @@ public class AuthController {
 
 	@Autowired
 	JwtUtils jwtUtils;
-
+	
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody User user) {
 
@@ -95,32 +94,14 @@ public class AuthController {
 		Set<String> strRoles = signUpRequest.getRoles();
 		Set<Role> roles = new HashSet<>();
 
-		if (strRoles == null) {
-			Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-					.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-			roles.add(userRole);
-		} else {
 			strRoles.forEach(role -> {
-				switch (role) {
-				case "admin":
-					Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+								Role enrollRole = roleRepository.findByDescription(role)
 							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-					roles.add(adminRole);
+					roles.add(enrollRole);
 
-					break;
-				case "mod":
-					Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-					roles.add(modRole);
-
-					break;
-				default:
-					Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-							.orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-					roles.add(userRole);
-				}
+							
 			});
-		}
+		
 
 		user.setRoles(roles);
 		userRepository.save(user);
